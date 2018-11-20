@@ -67,7 +67,7 @@ var formalizationModule = {
                     <br>\
                     <i class="icon-chevron-down" onclick="formalizationModule.analisys.history.showChecklist(this)"></i>\
                     <i class="icon-chevron-up" onclick="formalizationModule.analisys.history.hideChecklist(this)" style="display:none"></i>\
-                    <a  href="../Applications/images/RgGray.jpg" target="_blank" ><b>RG: </b></a>Reprovado\
+                    <a  href="../Applications/images/Especificação Técnica-V4.pdf" target="_blank" ><b>RG: </b></a>Reprovado\
                     <div class="checklist" style="margin-left:17px; display:none">\
                         <b>Criterio:</b> Legivel <span class="label label-success"><i class="icon-ok-sign icon-white" style="vertical-align: bottom;"></i></span>\
                         <br><b>Criterio:</b> Validade <span class="label label-important"><i class="icon-remove-sign icon-white" style="vertical-align: bottom;"></i></span>\
@@ -140,7 +140,7 @@ var formalizationModule = {
         <!-- Container principal para imagem -->\
         <div class="" style="float:left;width:70%">\
                 <div class="imageContent">\
-                    <div class="row" style="text-align: -webkit-center;margin-left:0px !important">\
+                    <div class="row groupFileManager" style="text-align: -webkit-center;margin-left:0px !important">\
                         <span style="margin-left:auto;margin-right:auto">\
                                 <span class="btn btn-light" onclick=\'img.zoomRotate(this, "", "in")\'><i class="icon-zoom-in"></i></span>\
                                 <span class="btn btn-light" onclick=\'img.zoomRotate(this, "", "out")\'><i class="icon-zoom-out"></i></span>\
@@ -155,6 +155,7 @@ var formalizationModule = {
                     </div>\
                     <div class="row" style=" text-align:center; margin-left:0px !important;  background-color: lightgray;;overflow:auto; border: solid thin #dddddd; margin-top:7px">\
                         <canvas class=\'image imageDefault\' style="margin-left:auto;margin-right:auto;background-color: gray;"></canvas>\
+						<embed class="plugin" src="" style="display:none;" >\
                     </div>\
                 </div>\
                 </div>\
@@ -795,14 +796,14 @@ var formalizationModule = {
 window.onload = function () {
     $('#check_rg').show();
     $('#doc_rg').click(function () {
-        img.imageDefaultSrc = "../Applications/images/RgGray.jpg";
+        img.imageDefaultSrc = "../Applications/images/Especificação Técnica-V4.pdf";
         img.init('.imageContent .imageDefault');
         $('#check_rg').show();
         $('#check_compres').hide();
         $('#check_cert').hide();
     });
     $('#doc_comp').click(function () {
-        img.imageDefaultSrc = "../Applications/images/ComprovanteResidencaGray.jpg";
+        img.imageDefaultSrc = "http://dev-unicred.orquestrabpm.com.br/document/preview/uploadled-file?c=YE0A0zVE65UWeQcZdZdEzMTZvO2boDCaCDpyk5eCHcLJJJ%2bzYoxm9oPNBnHaL33pGAMlMcq1gEavFC%2bpobtxjf7njDYNI4Ca8Xc3MwIu48CGIMshotkG2K8H35zT7kl5";
         img.init('.imageContent .imageDefault');
         $('#check_compres').show();
         $('#check_rg').hide();
