@@ -78,6 +78,19 @@ var formalizationModule = {
       </div>\
       <div class="modal-footer">\
         <button class="btn" data-dismiss="modal" aria-hidden="true">Fechar</button>\
+      </div>\
+    </div>',
+        modalComment: '<div style="width:auto" id="CommentModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">\
+      <div class="modal-header">\
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>\
+        <h3 id="myModalLabel">Comentário</h3>\
+      </div>\
+      <div class="modal-body">\
+        <br><b>Criterio:</b> <p style="display:inline-block" id="criteriaComment"></p>\
+          <br><b>Comentar:</b><br><textarea style="width:100%"></textarea>\
+            <p>\
+      <div class="modal-footer">\
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Fechar</button>\
         <button class="btn btn-primary">Salvar</button>\
       </div>\
     </div>',
@@ -134,20 +147,7 @@ var formalizationModule = {
                 <div class="tab-content">\
                   <div class="tab-pane active" id="tab1">\
                     <div style="margin-left:10px">\
-                      <p style="cursor:pointer" id="doc_rg">RG + CPF</p>\
-                        <div style="margin-left:10px; display:none" id="check_rg">\
-                            <p style="cursor:pointer">Legivel <icon class="icon icon-remove"></icon> <icon class="icon icon-comment"></icon></p>\
-                            <p style="cursor:pointer">Validade <icon class="icon icon-remove"></icon> <icon class="icon icon-comment"></p>\
-                        </div>\
-                      <p style="cursor:pointer" id="doc_comp">Comprovante de Residencia</p>\
-                        <div style="margin-left:10px; display:none" id="check_compres">\
-                            <p style="cursor:pointer">Legivel <icon class="icon icon-remove"></icon> <icon class="icon icon-comment"></icon></p>\
-                            <p style="cursor:pointer">Ultimos 3 meses <icon class="icon icon-remove"></icon> <icon class="icon icon-comment"></p>\
-                        </div>\
-                      <p style="cursor:pointer" id="doc_cert">Certidão de Nascimento</p>\
-                        <div style="margin-left:10px; display:none" id="check_cert">\
-                            <p style="cursor:pointer">Legivel <icon class="icon icon-remove"></icon> <icon class="icon icon-comment"></icon></p>\
-                        </div>\
+                       __filesForViewer__\
                     </div>\
                   </div>\
                   <div class="tab-pane" id="tab2">\
@@ -159,7 +159,13 @@ var formalizationModule = {
               </div>\
                 </div>\
         </div>\
-    </div>'
+    </div>',
+        fileForViewerPattern:
+            '<div><p style="cursor:pointer" fileviewer="__indexFile__" filedirectory="__fileDirectory__">__fileName__</p>\
+            <div style="margin-left:10px; display:none" checkviewer="__indexFile__">\
+                    <p style="cursor:pointer">Legivel <icon class="icon icon-remove"></icon> <icon class="icon icon-comment"></icon></p>\
+            <p style="cursor:pointer">Validade <icon class="icon icon-remove"></icon> <icon class="icon icon-comment"></p>\
+        </div></div>'
     },
     capture: {
         buildDocsHtml: function () {
@@ -370,7 +376,7 @@ var formalizationModule = {
             this.buttonClick();
             this.htmlDocBuild();
             this.buildHistory();
-
+            $('.content').append(formalizationModule.vars.modalComment);
 
         },
         loadButtons: function () {
@@ -416,8 +422,27 @@ var formalizationModule = {
             img.init('.imageContent .imageDefault');
         },
         htmlDocBuild: function () {
-            $('#BoxFrmExecute').append(formalizationModule.vars.analisysContentBody);
+            var analisysContentBody = formalizationModule.vars.analisysContentBody;
+            var attachedFiles = this.getAttachedFiles();
 
+            var fileForViewContent = '';
+            $.each(attachedFiles, function (i, file) {
+                fileForViewContent += formalizationModule.vars.fileForViewerPattern;
+                fileForViewContent = fileForViewContent.replace('__indexFile__', i);
+                fileForViewContent = fileForViewContent.replace('__indexFile__', i);
+                fileForViewContent = fileForViewContent.replace('__fileName__', file.DocType);
+                fileForViewContent = fileForViewContent.replace('__fileDirectory__', file.Directory);
+            });
+
+            analisysContentBody = analisysContentBody.replace('__filesForViewer__', fileForViewContent);
+            $('#BoxFrmExecute').append(analisysContentBody);
+        },
+        getAttachedFiles: function () {
+            var files = [];
+            $.each($('#tblFile tbody tr'), function (i, row) {
+                files.push({ DocType: $(row).find('.docType').html(), Directory: $(row).find('.filename a').attr('href') });
+            });
+            return files;
         },
         requestHistory: function () {
 
@@ -902,41 +927,34 @@ var formalizationModule = {
 };
 //$('window').load(function(){
 window.onload = function () {
-    $('#check_rg').show();
-    $('#doc_rg').click(function () {
-        img.imageDefaultSrc = "../Applications/images/Especificação Técnica-V4.pdf";
+    if ($('div[checkviewer]').length > 0) {
+        img.imageDefaultSrc = $($('p[fileviewer]')[0]).attr('filedirectory');
         img.init('.imageContent .imageDefault');
-        $('#check_rg').show();
-        $('#check_compres').hide();
-        $('#check_cert').hide();
-    });
-    $('#doc_comp').click(function () {
-        img.imageDefaultSrc = "http://dev-unicred.orquestrabpm.com.br/document/preview/uploadled-file?c=YE0A0zVE65UWeQcZdZdEzMTZvO2boDCaCDpyk5eCHcLJJJ%2bzYoxm9oPNBnHaL33pGAMlMcq1gEavFC%2bpobtxjf7njDYNI4Ca8Xc3MwIu48CGIMshotkG2K8H35zT7kl5";
+        $($('div[checkviewer]')[0]).show();
+    }
+
+    $('p[fileviewer]').click(function () {
+        var obj = $(this);
+        img.imageDefaultSrc = obj.attr('filedirectory');
         img.init('.imageContent .imageDefault');
-        $('#check_compres').show();
-        $('#check_rg').hide();
-        $('#check_cert').hide();
-    });
-    $('#doc_cert').click(function () {
-        img.imageDefaultSrc = "../Applications/images/CertidaoNascimentoGray.jpg";
-        img.init('.imageContent .imageDefault');
-        $('#check_compres').hide();
-        $('#check_rg').hide();
-        $('#check_cert').show();
+
+        obj.parent('div').find('div[checkviewer=' + obj.attr('fileviewer') + ']').show();
+        $.each($('div[checkviewer]'), function (i, check) {
+            if ($(check).attr('checkviewer') !== obj.attr('fileviewer'))
+                $(check).hide();
+        });
     });
 
     $('.icon.icon-comment').click(function () {
-        $('#historicoModal').modal('toggle');
-        $('#myModalLabel').html('Comentar');
-        $('#historicoModal .modal-body p').first().show();
-        $('.task').hide();
-        $('#historicoModal').css('width', '');
+        $('#CommentModal').modal('toggle');
+        $('#CommentModal .modal-body p').first().show();
+        $('#criteriaComment').text($(this).parent('p').text().trim());
+        $('#CommentModal').css('width', '');
 
     });
     $('.icon.icon-time').click(function () {
         $('#historicoModal').modal('toggle');
         $('#historicoModal .modal-body p').first().hide();
-        $('#myModalLabel').html('Historico');
         $('.task').show();
         $('#historicoModal').css('width', 'auto');
     });
