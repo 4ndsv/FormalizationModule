@@ -1,30 +1,29 @@
 var formalizationModule = {
     vars: {
         groupName: "Documentos",
-        docList: [{
-            "id": "1",
-            "Nome": "RG + CPF"
-        }
+        docList: [
         ],
         docPattern: "<span cod='__id__' onclick='formalizationModule.capture.upload(this)' class='badge badge-secondary' style='margin-right:5px; margin-bottom:5px; cursor:pointer;'>\
-        __doc__</span><input cod='__id__' label='Documento __doc__' required='S' style='display:none'>",
-        // <input cod='__id__' style='display:none' type='file'></input>",
+        __doc__</span>",
         docsHtml: "",
-        modulePattern: '<tr>\
+        docTypeList: [],
+        uploadForDocType: false,
+        modulePatternTemplate: '<tr>\
             <td>\
-                <table class="form" id="customizedUpload">\
+                <table class="form" id="customizedUpload" style="width:auto">\
                     <tbody>\
-                        <tr class="group" style="display:none">\
-                            <td class="group" style="display:none">__groupName__</td>\
+                        <tr style="display:none" class="group">\
+                            <td class="group">__groupName__</td>\
                         </tr>\
                         <tr>\
-                            <td class="col0" style="display:none"><div class="btn btn-primary btn-small" data-toggle="modal" data-target="#formalizationModal" >Adicionar</div></td>\
+                            <td style="display:none" class="col0"><div class="btn btn-primary btn-small" data-toggle="modal" data-target="#formalizationModal" >Adicionar</div></td>\
                             <td class="col1">__docsHtml__</td>\
                         </tr>\
                     </tbody>\
                 </table>\
             </td>\
         </tr>',
+        modulePattern: '',
         buttonsPattern: '<span id="btnsFormalization" style="float:right; margin-top:10px; margin-right:10px">\
             <span class="btn btn-default" onclick="formalizationModule.analisys.showForm()"><icon class="icon icon-list-alt"></icon></span>\
             <span class="btn btn-default" onclick="formalizationModule.analisys.showDocs()"><icon class="icon icon-picture"></icon></span>\
@@ -45,70 +44,37 @@ var formalizationModule = {
           <span class="btn btn-primary" onclick="formalizationModule.capture.modalSave()">Salvar</span>\
         </div>\
       </div>',
-        modalHistorico: '<div style="width:auto" id="historicoModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">\
+        historyTaskPattern: '\
+        <div class="task">\
+            <i class="icon-chevron-down" onclick="formalizationModule.analisys.history.showDocs(this)"></i>\
+            <i class="icon-chevron-up" onclick="formalizationModule.analisys.history.hideDocs(this)" style="display:none"></i>\
+            <b>Etapa: </b> __etapa__ <b>Status: </b> __statusTask__ <b>Autor:</b> __autorTask__ <b>Data:</b> __dataInicioTask__ - __dataFimTask__\
+            <div class="document" style="margin-left:17px;display:none">\
+                <b>Documentos</b>\
+                __documentContent__\
+                <br>\
+                </p>\
+            </div>\
+        </div>',
+        historyDocumentPattern:
+            '<span>\
+                    <br>\
+                    <i class="icon-chevron-down" onclick="formalizationModule.analisys.history.showChecklist(this)"></i>\
+                    <i class="icon-chevron-up" onclick="formalizationModule.analisys.history.hideChecklist(this)" style="display:none"></i>\
+                    <a  href="__diretorioFile__" target="_blank" ><b>__document__: </b></a>__status__\
+                    <div class="checklist" style="margin-left:17px; display:none">\
+                        __checklistContent__\
+                    </div>\
+                </span>',
+        historyChecklistPattern: '<b>Criterio:</b> __criteria__ <span class="label label-__sucessImportant__"><i class="icon-__iconCheck__-sign icon-white" style="vertical-align: bottom;"></i></span><br>',
+        historyCommentPattern: '<b style="margin-left:17px">Comentario:</b> __comment__<br>',
+        modalhistory: '<div style="width:auto" id="historicoModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">\
       <div class="modal-header">\
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>\
         <h3 id="myModalLabel">Historico</h3>\
       </div>\
       <div class="modal-body">\
-        <p>\
-          <br><b>Criterio:</b> Ilegivel\
-          <br><b>Comentar:</b><br><textarea style="width:100%"></textarea>\
-        </p>\
-        <p>\
-        \
-        <div class="task" taskId="1">\
-            <i class="icon-chevron-down" onclick="formalizationModule.analisys.history.showDocs(this)"></i>\
-            <i class="icon-chevron-up" onclick="formalizationModule.analisys.history.hideDocs(this)" style="display:none"></i>\
-            <b>Etapa: </b> T01 - Inicio <b>Status: </b> Concluido <b>Autor:</b> Rafael Carvalho <b>Data:</b> 15/11/18 10:35 - 16/11/18 11:05\
-            <div class="document" style="margin-left:17px;display:none">\
-                <b>Documentos</b>\
-                <span>\
-                    <br>\
-                    <i class="icon-chevron-down" onclick="formalizationModule.analisys.history.showChecklist(this)"></i>\
-                    <i class="icon-chevron-up" onclick="formalizationModule.analisys.history.hideChecklist(this)" style="display:none"></i>\
-                    <a  href="../Applications/images/Especificação Técnica-V4.pdf" target="_blank" ><b>RG: </b></a>Reprovado\
-                    <div class="checklist" style="margin-left:17px; display:none">\
-                        <b>Criterio:</b> Legivel <span class="label label-success"><i class="icon-ok-sign icon-white" style="vertical-align: bottom;"></i></span>\
-                        <br><b>Criterio:</b> Validade <span class="label label-important"><i class="icon-remove-sign icon-white" style="vertical-align: bottom;"></i></span>\
-                        <br><b style="margin-left:17px">Comentario:</b> RG Vencido\
-                    </div>\
-                </span>\
-                <span>\
-                    <br>\
-                    <i class="icon-chevron-down" onclick="formalizationModule.analisys.history.showChecklist(this)"></i>\
-                    <i class="icon-chevron-up" onclick="formalizationModule.analisys.history.hideChecklist(this)" style="display:none"></i>\
-                    <a  href="/document/preview/capturar?c=eaBKhIga%2ffDNREtMIWHjblwb3kO9lnJ3ziYngyeXd8w9Z65F4Das0K9gdCoNEtZ7" target="_blank" ><b>CPF: </b></a>Aprovado\
-                    <div class="checklist" style="margin-left:17px; display:none">\
-                        <b>Criterio:</b> Legivel <span class="label label-success"><i class="icon-ok-sign icon-white" style="vertical-align: bottom;"></i></span>\
-                        <br><b>Criterio:</b> Validade <span class="label label-success"><i class="icon-ok-sign icon-white" style="vertical-align: bottom;"></i></span>\
-                    </div>\
-                </span>\
-                <br>\
-                </p>\
-            </div>\
-        </div>\
-        <hr>\
-        \
-        \
-        \
-        <div style="display:none"><p>\
-        <br><b>Criterio:</b> Ilegivel\
-        <br><b>Comentario:</b> Não foi possivel a leitura dos numeros do RG\
-        <br><b>Autor:</b> Rafael Carvalho\
-        </p>\
-        <hr>\
-        <p> <b>Documento:</b> RG + CPF\
-        <br><b>Criterio:</b> Ilegivel\
-        <br><b>Comentario:</b> Não foi possivel a leitura dos numeros do RG\
-        <br><b>Autor:</b> Rafael Carvalho\
-        </p>\
-        <hr>\
-        <p> <b>Documento:</b> RG + CPF\
-        <br><b>Criterio:</b> Ilegivel\
-        <br><b>Comentario:</b> Não foi possivel a leitura dos numeros do RG\
-        <br><b>Autor:</b> Rafael Carvalho\
-        </p></div>\
+        __historyContent__\
       </div>\
       <div class="modal-footer">\
         <button class="btn" data-dismiss="modal" aria-hidden="true">Fechar</button>\
@@ -197,26 +163,47 @@ var formalizationModule = {
     },
     capture: {
         buildDocsHtml: function () {
+            formalizationModule.vars.docsHtml = '';
             $.each(formalizationModule.vars.docList, function (i, e) {
-                formalizationModule.vars.docsHtml += formalizationModule.vars.docPattern.replace(/__doc__/g, this.Nome)
+                formalizationModule.vars.docsHtml += formalizationModule.vars.docPattern.replace('__doc__', this.Nome)
                     .replace(/__id__/g, this.id);
-            })
+            });
+            formalizationModule.vars.modulePattern = formalizationModule.vars.modulePatternTemplate;
             formalizationModule.vars.modulePattern =
                 formalizationModule.vars.modulePattern.replace('__docsHtml__', formalizationModule.vars.docsHtml)
                     .replace('__groupName__', formalizationModule.vars.groupName);
         },
         appendModule: function () {
-            $('#ContainerAttach').append(formalizationModule.vars.modulePattern);
-            //$('.content>.row-fluid:first').append(formalizationModule.vars.modal);
+            // TODO é necessário incluir um conteiner antes pra poder limpar dentro dele apenas? ou coloc um class no module pattern?
+            var formExecute = $('#ContainerAttach');
+            var customUpload = formExecute.find('#customizedUpload');
+
+            if (customUpload.length > 0) {
+                customUpload[0].parentNode.removeChild(customUpload[0]);
+            }
+
+            //formExecute.append(formalizationModule.vars.modulePattern);
+            $(formalizationModule.vars.modulePattern).insertAfter("#ContainerAttach .box-header");
+
+            //if (formExecute.find('#customizedUpload').length === 0) {
+            //	formExecute.append(formalizationModule.vars.modulePattern);
+            //}
+
+            if ($('#formalizationModal').length > 0) {
+                return;
+            }
+            $('.content>.row-fluid:first').append(formalizationModule.vars.modal);
 
         },
         upload: function (e) {
             var cod = $(e)[0].getAttribute('cod');
             if ($('#customizedUpload span.badge[cod=' + cod + ']').length > 0) {
-                if (!$(e).hasClass('badge-success') && $('#customizedUpload span.badge[cod=' + cod + ']').attr('show') != 'n') {
-                    $('#customizedUpload span.badge').removeClass('last')
+                if (!$(e).hasClass('badge-success') && $('#customizedUpload span.badge[cod=' + cod + ']').attr('show') !== 'n') {
+                    $('#customizedUpload span.badge').removeClass('last');
                     $(e).addClass('last');
-                    $('#annex [type=button]').trigger('click')
+                    formalizationModule.vars.uploadForDocType = true;
+                    var docType = $(e)[0].innerText.split('>')[0].trim();
+                    uploadFiles(docType);
                 } else {
                     formalizationModule.capture.showUpload(cod);
                 }
@@ -229,71 +216,81 @@ var formalizationModule = {
         addDoc: function (name, added) {
             var id = ++$('#customizedUpload .col1').children().length;
             if (!isEmpty(name)) {
-                $('#customizedUpload .col1').append(formalizationModule.vars.docPattern.replace('__id__', id).replace('__doc__', name).replace("<input cod='__id__' label='Documento __doc__' required='S' style='display:none'>", ''))
+                $('#customizedUpload .col1').append(formalizationModule.vars.docPattern.replace('__id__', id).replace('__doc__', name));
                 $('#formalizationModal input').val('');
                 $('#formalizationModal').modal('hide');
                 if (added) {
-                    $('#customizedUpload .col1 span:last').attr('added', 'true').append('<div>  <span class="icon-minus-sign" onclick="formalizationModule.capture.removeDoc(' + id + ')"></span></div>')
+                    $('#customizedUpload .col1 span:last')
+                        .attr('added', 'true')
+                        .append('<div>  <span class="icon-minus-sign" onclick="formalizationModule.capture.removeDoc(' + id + ')"></span></div>');
                 }
             }
         },
         removeDoc: function (id) {
             $('#annex #tblNewFile .filename  a[cod=' + id + ']').closest('tr').find('.delFile').trigger('click');
-            if ($('#annex #tblNewFile .filename  a[cod=' + id + ']').length == 0) {
+            if ($('#annex #tblNewFile .filename  a[cod=' + id + ']').length === 0) {
                 $('#customizedUpload .col1 span[cod=' + id + ']').remove();
-            };
+            }
         },
         init: function () {
-            $('#ContainerAttach #annex').hide();
-            //$('#ContainerAttach').hide();
-            //var sendAction = $('#BtnSend').attr('onclick');
-            //$('#BtnSend').removeAttr('onclick');
 
         },
         uploadChange: function () {
+
             var targetNode = $('#annex')[0];
+
+            if (!targetNode) {
+                return;
+            }
+
             var observerOptions = {
                 childList: true,
                 attributes: false,
-                subtree: true //Omit or set to false to observe only changes to the parent node.
-            }
+                subtree: true
+            };
+
             var observer = new MutationObserver(function (m) {
                 if ($('.last').length > 0) {
-                    var cod = $('.last')[0].getAttribute('cod')
+                    var cod = $('.last')[0].getAttribute('cod');
                     if (m[0].addedNodes.length > 0) {
+                        if (!formalizationModule.vars.uploadForDocType)
+                            return;
+
                         $('#tblNewFile .filename a:last').attr('cod', cod);
+                        $('#customizedUpload span[cod=' + cod + ']').find('.icon-remove').parent().remove();
                         $('#customizedUpload span[cod=' + cod + ']').removeClass('badge-secondary').addClass('badge-success');
-                        $('#customizedUpload input[cod=' + cod + ']').attr('required', 'N');
-                        $('#customizedUpload span[cod=' + cod + ']').append('<div>   <span class="icon-remove" onclick="formalizationModule.capture.removeUpload(' + cod + ')"></span></div>')
+                        $('#customizedUpload span[cod=' + cod + ']').append('<div>   <span class="icon-remove" onclick="formalizationModule.capture.removeUpload(' + cod + ')"></span></div>');
                     } else if (m[0].removedNodes.length > 0) {
+                        cod = $(m[0].removedNodes[0].cells[2]).find('a').attr('cod');
                         $('#customizedUpload span[cod=' + cod + ']').removeClass('badge-success').addClass('badge-secondary');
-                        $('#customizedUpload input[cod=' + cod + ']')[0].setAttribute('required', 'S');
                         $('#customizedUpload span[cod=' + cod + ']').find('.icon-remove').parent().remove();
                     }
                 }
+                formalizationModule.vars.uploadForDocType = false;
             });
+
             observer.observe(targetNode, observerOptions);
 
         },
         showUpload: function (cod) {
-            if ($('#customizedUpload span.badge[cod=' + cod + ']').attr('show') != 'n') {
+            if ($('#customizedUpload span.badge[cod=' + cod + ']').attr('show') !== 'n') {
                 $('#annex #tblNewFile .filename  a[cod=' + cod + ']').trigger('click');
-                //$('#uploadModal').modal();
-                //$('#uploadModal .modal-content').append(
-                //    '<embed src="' + $('input[cod="' + cod + '"]').val() + '" type="application/pdf" width="100%" height="100%">'
-                //)
-            };
+            }
             $('#customizedUpload span.badge[cod=' + cod + ']').removeAttr('show');
         },
         removeUpload: function (cod) {
 
-            $('#customizedUpload span.badge').removeClass('last')
+            $('#customizedUpload span.badge').removeClass('last');
             $('#customizedUpload span.badge[cod=' + cod + ']').addClass('last').attr('show', 'n');
-            //var cod = $(e).attr(cod);
 
-            var r = $('#annex #tblNewFile .filename  a[cod=' + cod + ']').closest('tr').find('.delFile').trigger('click')
+            var r = $('#annex #tblNewFile .filename  a[cod=' + cod + ']').closest('tr').find('.delFile').trigger('click');
         },
         buildModal: function () {
+
+            if ($('#uploadModal').length > 0) {
+                return;
+            }
+
             $('body form').append(
                 '<div id="uploadModal" class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">\
                   <div class="modal-dialog modal-lg">\
@@ -301,15 +298,59 @@ var formalizationModule = {
                     </div>\
                   </div>\
                 </div>');
-            $(document).find('head').append('<style type="text/css">.modal{left:5% !important;width:90% !important;margin-left:0 !important}</style>')
+            $(document).find('head').append('<style type="text/css">.modal{left:5% !important;width:90% !important;margin-left:0 !important}</style>');
+        },
+        validateFilesImported: function () {
+            for (var j = 0; j < $('#customizedUpload .badge').length; j++) {
+
+                for (var i = 0; i < $('#tblNewFile [name=inpDsFileName]').length; i++) {
+                    if ($('#tblNewFile [name=inpDsFileName]')[i].value.split(';')[5].trim() === '')
+                        continue;
+
+                    if ($('#tblNewFile [name=inpDsFileName]')[i].value.split(';')[5].trim() === $('#customizedUpload .badge')[j].innerText.trim()) {
+                        var cod = $($('#customizedUpload .badge')[j]).attr('cod');
+                        $($('#tblNewFile .filename a')[i]).attr('cod', cod);
+                        $('#customizedUpload span[cod=' + cod + ']').find('.icon-remove').parent().remove();
+                        $('#customizedUpload span[cod=' + cod + ']').removeClass('badge-secondary').addClass('badge-success');
+                        $('#customizedUpload span[cod=' + cod + ']').append('<div>   <span class="icon-remove" onclick="formalizationModule.capture.removeUpload(' + cod + ')"></span></div>');
+                    }
+                }
+
+                for (var k = 0; k < formalizationModule.vars.docTypeList.length; k++) {
+                    if ($('#customizedUpload .badge')[j].innerText.trim() === formalizationModule.vars.docTypeList[k].docType) {
+                        formalizationModule.vars.docTypeList.splice(k, 1);
+                        break;
+                    }
+                }
+            }
+
+            for (var l = 0; l < formalizationModule.vars.docTypeList.length; l++) {
+                var fileImported = false;
+                for (var m = 0; m < $('#tblNewFile [name=inpDsFileName]').length; m++) {
+                    if ($($('#tblNewFile .filename a')[m]).attr('cod') === formalizationModule.vars.docTypeList[l].cod)
+                        fileImported = true;
+                }
+                if (fileImported)
+                    delFile($($('#annex #tblNewFile .filename  a[cod=' + formalizationModule.vars.docTypeList[l].cod + ']').closest('tr').find('.delFile'))[0]);
+            }
+
+
+        },
+        populateDocTypeList: function () {
+            formalizationModule.vars.docTypeList = [];
+            for (var i = 0; i < $('#customizedUpload .badge').length; i++) {
+                formalizationModule.vars.docTypeList.push({ docType: $('#customizedUpload .badge')[i].innerText.trim(), cod: $($('#customizedUpload .badge')[i]).attr('cod') });
+            }
         },
         load: function () {
-            //call this method to show capture module.
+            //$('#ContainerAttach').hide();
             this.init();
             this.buildDocsHtml();
             this.appendModule();
             this.uploadChange();
             this.buildModal();
+            this.validateFilesImported();
+            this.populateDocTypeList();
         },
         uploadValidation: function () {
             var r = true;
@@ -328,7 +369,7 @@ var formalizationModule = {
             this.loadButtons();
             this.buttonClick();
             this.htmlDocBuild();
-            $('.content').append(formalizationModule.vars.modalHistorico);
+            this.buildHistory();
 
 
         },
@@ -377,6 +418,73 @@ var formalizationModule = {
         htmlDocBuild: function () {
             $('#BoxFrmExecute').append(formalizationModule.vars.analisysContentBody);
 
+        },
+        requestHistory: function () {
+
+            var codFlowExecute = document.getElementById('inpCodFlowExecute').value;
+            var token = document.getElementById('inpToken').value;
+
+            return $.ajax({
+                url: '../api/1.0/businessrules/' + codFlowExecute,
+                method: 'GET',
+                headers: { 'Authorization': token }
+            });
+
+        },
+        buildHistory: function () {
+            var historyContent = '';
+            this.requestHistory()
+                .then(function (history, textStatus, xhr) {
+
+                    var taskContent = '';
+                    $.each(history, function (iTask, task) {
+                        taskContent += formalizationModule.vars.historyTaskPattern;
+                        taskContent = taskContent.replace('__etapa__', task.Etapa);
+                        taskContent = taskContent.replace('__statusTask__', task.Status);
+                        taskContent = taskContent.replace('__autorTask__', task.Autor);
+                        taskContent = taskContent.replace('__dataInicioTask__', task.DataInicio);
+                        taskContent = taskContent.replace('__dataFimTask__', task.DataFim);
+
+                        var documentContent = '';
+                        $.each(task.Documentos, function (iDocument, document) {
+                            documentContent += formalizationModule.vars.historyDocumentPattern;
+                            documentContent = documentContent.replace('__document__', document.Nome);
+                            documentContent = documentContent.replace('__diretorioFile__', document.Diretorio);
+
+                            var approved = true;
+                            var checklistContent = '';
+                            $.each(document.Criterios, function (iCheck, check) {
+                                checklistContent += formalizationModule.vars.historyChecklistPattern;
+                                checklistContent = checklistContent.replace('__criteria__', check.Nome);
+                                checklistContent = checklistContent.replace('__iconCheck__', check.Approved ? 'ok' : 'remove');
+                                checklistContent = checklistContent.replace('__sucessImportant__', check.Approved ? 'success' : 'important');
+
+                                if (check.Comentario !== '') {
+                                    var commentContent = formalizationModule.vars.historyCommentPattern;
+                                    commentContent = commentContent.replace('__comment__', check.Comentario);
+
+                                    checklistContent += commentContent;
+                                }
+
+                                if (!check.Approved)
+                                    approved = false;
+                            });
+
+                            documentContent = documentContent.replace('__status__', !document.Criterios.length ? 'Capturado' : approved ? 'Aprovado' : 'Reprovado');
+                            documentContent = documentContent.replace('__checklistContent__', checklistContent);
+                        });
+
+                        taskContent = taskContent.replace('__documentContent__', documentContent);
+                    });
+
+                    historyContent = formalizationModule.vars.modalhistory.replace('__historyContent__', taskContent);
+
+                    $('.content').append(historyContent);
+                },
+                    function (erro) {
+                        // exceção da cadeia de promessas
+                        console.log(erro);
+                    });
         },
         history: {
             showDocs: function (t) {
@@ -791,7 +899,7 @@ var formalizationModule = {
             });
         }
     }
-}
+};
 //$('window').load(function(){
 window.onload = function () {
     $('#check_rg').show();
@@ -822,7 +930,7 @@ window.onload = function () {
         $('#myModalLabel').html('Comentar');
         $('#historicoModal .modal-body p').first().show();
         $('.task').hide();
-        $('#historicoModal').css('width', '')
+        $('#historicoModal').css('width', '');
 
     });
     $('.icon.icon-time').click(function () {
@@ -830,10 +938,10 @@ window.onload = function () {
         $('#historicoModal .modal-body p').first().hide();
         $('#myModalLabel').html('Historico');
         $('.task').show();
-        $('#historicoModal').css('width', 'auto')
+        $('#historicoModal').css('width', 'auto');
     });
     $('#div11568').text('André de Sousa Viana');
     $('#div11567').text('Brasileiro');
 
 
-}
+};
