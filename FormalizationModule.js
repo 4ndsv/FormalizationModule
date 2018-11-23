@@ -164,13 +164,10 @@ var formalizationModule = {
         fileForViewerPattern:
             '<div><p style="cursor:pointer" fileviewer="__indexFile__" filedirectory="__fileDirectory__">__fileName__</p>\
             <div style="margin-left:10px; display:none" checkviewer="__indexFile__">\
-                    <p class="criteria" index="0" approved="true" comment="" style="cursor:pointer">Legivel\
+        </div></div>',
+        criteriaContentPattern: '<p class="criteria" index="__index__" approved="true" comment="" style="cursor:pointer">__criteriaName__\
             <span class= "label label-default removeCriteria"> <i class="icon-remove-sign icon-white"></i></span></icon>\
-            <span class="label label-default commentCriteria"><i class="icon-comment icon-white"></i></span></p>\
-                    <p class="criteria" index="1" approved="true" comment="" style="cursor:pointer">Validade\
-            <span class= "label label-default removeCriteria"> <i class="icon-remove-sign icon-white"></i></span></icon>\
-            <span class="label label-default commentCriteria"><i class="icon-comment icon-white"></i></span></p>\
-        </div></div>'
+            <span class="label label-default commentCriteria"><i class="icon-comment icon-white"></i></span></p>'
     },
     capture: {
         buildDocsHtml: function () {
@@ -390,7 +387,7 @@ var formalizationModule = {
             var fileList = []
             let codBre = _this.getCodBrePromise()
                 .then(function (codBre) {
-                    return _this.validateBusinessRulesRequest(5, _this.getFormData());
+                    return _this.validateBusinessRulesRequest(4, _this.getFormData());
                 }).then(function (list) {
                     console.log(list);
                 });
@@ -406,7 +403,7 @@ var formalizationModule = {
                 data: codFlow
             });*/
             var def = jQuery.Deferred();
-            def.resolve(5);
+            def.resolve(4);
             return def;
         },
         validateBusinessRulesRequest: function (businessRuleCode, formData) {
@@ -417,7 +414,7 @@ var formalizationModule = {
                 url: '../api/1.0/businessrules/' + businessRuleCode + '/evaluate',
                 method: 'POST',
                 headers: {
-                    'Authorization': '0%2f3JDAFZmL5OuPD4z0XHrkK3cFFVkMGfLXY3RQ4QWtIuIaMaZ6uzpD8bHwJstFcmBv7yPuLA%2b84s%2blZfZJZ1otGGFuIiqqZhinrWKR4l%2fO34YxrkLieuWZyoAgGBhWXZ5M3ein0Zaj1tKExMvTyV8g%3d%3d',
+                    'Authorization': $('#inpToken').val(),
                     'Content-Type': 'application/json'
                 },
                 // dataType: 'json', // a propriedade headers sobrescreve isso
@@ -469,19 +466,23 @@ var formalizationModule = {
                         });
                     }
 
+
                     $.each(files, function (index, document) {
                         if (document.Document === '')
                             return true;
 
-                        fileList.push({
-                            id: index,
-                            Nome: document.Document
+                        $.each(document.Checklist, function (iCheck, check) {
+                            if (check.Name === '')
+                                return true;
+
+                            var fileViewer = $('[fileviewer]').filter(function () { return $(this).text() === document.Document; })
+                            if (fileViewer != undefined) {
+                                var checkViewer = fileViewer.parent('div').find('[checkviewer]')
+                                var pattern = formalizationModule.vars.criteriaContentPattern.replace('__index__', iCheck).replace('__criteriaName__', check.Name);
+                                checkViewer.append(pattern);
+                            }
                         });
                     });
-
-                    formalizationModule.vars.docList = fileList;
-                    formalizationModule.capture.load();
-                    return fileList;
                 });
             return ajaxPromise;
         },
@@ -491,10 +492,11 @@ var formalizationModule = {
             $.each(inputs, function (i, obj) {
                 var dsName = $(obj).attr('xname').replace(/^inp/, '');
                 var dsValue = $(obj).val();
-                elements.push({ fieldName: dsName, value: dsValue });
+                elements.push({ DsFieldName: dsName, DsValue: dsValue });
             });
 
-            return elements
+            return elements;
+        },
         loadButtons: function () {
             //$('#ContainerForm .box-header h2').css('float', 'left');
             $('#ContainerForm').prepend(formalizationModule.vars.buttonsPattern);
