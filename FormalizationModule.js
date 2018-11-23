@@ -162,7 +162,7 @@ var formalizationModule = {
         </div>\
     </div>',
         fileForViewerPattern:
-            '<div><p style="cursor:pointer" fileviewer="__indexFile__" filedirectory="__fileDirectory__">__fileName__</p>\
+            '<div><p style="cursor:pointer" fileviewer="__indexFile__" codfile="__codfile__" filedirectory="__fileDirectory__">__fileName__</p>\
             <div style="margin-left:10px; display:none" checkviewer="__indexFile__">\
                     <p class="criteria" index="0" approved="true" comment="" style="cursor:pointer">Legivel\
             <span class= "label label-default removeCriteria"> <i class="icon-remove-sign icon-white"></i></span></icon>\
@@ -392,7 +392,8 @@ var formalizationModule = {
             $('#btnsFormalization .btn').click(function () {
                 $('#btnsFormalization .btn').attr('class', 'btn btn-default');
                 $(this).removeClass('btn-default').addClass('btn-primary');
-            })
+            });
+            $('#btnFinish').click(this.saveHistory);
         },
         showDocs: function () {
             $('#FrmExecute').hide();
@@ -427,7 +428,7 @@ var formalizationModule = {
             this.docsInit();
         },
         docsInit: function () {
-            if ($('div[checkviewer]').length > 0) {
+            if (img.imageDefaultSrc.trim() == "" && $('div[checkviewer]').length > 0) {
                 img.imageDefaultSrc = $($('p[fileviewer]')[0]).attr('filedirectory');
                 img.init('.imageContent .imageDefault');
                 $($('div[checkviewer]')[0]).show();
@@ -443,6 +444,7 @@ var formalizationModule = {
                 fileForViewContent = fileForViewContent.replace('__indexFile__', i);
                 fileForViewContent = fileForViewContent.replace('__indexFile__', i);
                 fileForViewContent = fileForViewContent.replace('__fileName__', file.DocType);
+                fileForViewContent = fileForViewContent.replace('__codfile__', file.CodFile);
                 fileForViewContent = fileForViewContent.replace('__fileDirectory__', file.Directory);
             });
 
@@ -452,17 +454,31 @@ var formalizationModule = {
         getAttachedFiles: function () {
             var files = [];
             $.each($('#tblFile tbody tr'), function (i, row) {
-                files.push({ DocType: $(row).find('.docType').html(), Directory: $(row).find('.filename a').attr('href') });
+                files.push({
+                    DocType: $(row).find('.docType').html(),
+                    Directory: $(row).find('.filename a').attr('href'),
+                    CodFile: $(row).attr('data-id')
+                });
             });
             return files;
+        },
+        saveHistory: function () {
+            var codFlowExecute = document.getElementById('inpCodFlowExecuteTask');
+            var codFile = document.getElementById('inpCodFlowExecuteTask');
+            var dsCriteria = document.getElementById('inpCodFlowExecuteTask');
+            var stApproved = document.getElementById('inpCodFlowExecuteTask');
+            //var codFlowExecute = document.getElementById('inpCodFlowExecuteTask');
+
+            //var data = { CodFlowExecute:  }
         },
         requestHistory: function () {
 
             var codFlowExecute = document.getElementById('inpCodFlowExecute').value;
+            var codFlowExecuteTask = document.getElementById('inpCodFlowExecuteTask').value;
             var token = document.getElementById('inpToken').value;
 
             return $.ajax({
-                url: '../api/1.0/businessrules/' + codFlowExecute,
+                url: '../Applications/api-formalization-unicred/api/history/' + codFlowExecute + '/' + codFlowExecuteTask,
                 method: 'GET',
                 headers: { 'Authorization': token }
             });
@@ -984,6 +1000,7 @@ window.onload = function () {
 
         criteria.attr('comment', $('#txtComment').val());
     });
+
     $('#div11568').text('André de Sousa Viana');
     $('#div11567').text('Brasileiro');
 
