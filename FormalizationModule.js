@@ -378,8 +378,119 @@ var formalizationModule = {
             this.htmlDocBuild();
             this.buildHistory();
             $('.content').append(formalizationModule.vars.modalComment);
+            this.loadChecklist();
 
         },
+        loadChecklist: function () {
+            var _this = this;
+            var fileList = []
+            let codBre = _this.getCodBrePromise()
+                .then(function (codBre) {
+                    return _this.validateBusinessRulesRequest(5, _this.getFormData());
+                }).then(function (list) {
+                    console.log(list);
+                });
+
+
+
+        },
+        getCodBrePromise: function () {
+            let codFlow = document.getElementById('inpCodFlow').value;
+            /*var promiseCodBre = $.ajax({
+                url: "urldoMarco" + "method",
+                type: "GET",
+                data: codFlow
+            });*/
+            var def = jQuery.Deferred();
+            def.resolve(5);
+            return def;
+        },
+        validateBusinessRulesRequest: function (businessRuleCode, formData) {
+
+            var _this = this;
+
+            var ajaxPromise = $.ajax({
+                url: '../api/1.0/businessrules/' + businessRuleCode + '/evaluate',
+                method: 'POST',
+                headers: {
+                    'Authorization': '0%2f3JDAFZmL5OuPD4z0XHrkK3cFFVkMGfLXY3RQ4QWtIuIaMaZ6uzpD8bHwJstFcmBv7yPuLA%2b84s%2blZfZJZ1otGGFuIiqqZhinrWKR4l%2fO34YxrkLieuWZyoAgGBhWXZ5M3ein0Zaj1tKExMvTyV8g%3d%3d',
+                    'Content-Type': 'application/json'
+                },
+                // dataType: 'json', // a propriedade headers sobrescreve isso
+                data: JSON.stringify(formData)
+            })
+                .then(function (result, textStatus, xhr) {
+
+                    /*
+                    se se enquadrar em uma ou mais condições
+                    { CodBreRule: 1, StReturnType: 'string', DsReturn: '/nome do documento > condicao1 > condicao2; outro nome do documento > condicao3'}, CodBreRule: 2, StReturnType: 'string', DsReturn: '/mais um nome do documento > condicao4'}]
+                    se se enquadrar no se não
+                    [{StElseReturnType: 'string', DsElseReturn: '??' }
+                    se não se enquadrar em nenhuma condição
+                    [{StElseReturnType: '', DsElseReturn: '' }
+                    */
+
+                    var businessRuleResult;
+                    var files = [];
+                    var fileList = [];
+
+                    for (var i = 0; i < result.length; i++) {
+
+                        businessRuleResult = result[i];
+
+                        if (businessRuleResult.hasOwnProperty('StElseReturnType')) {
+
+                            // se vier com formato inválido, não tomar ação
+
+                            // pré-verificação pra evitar regex
+                            if (businessRuleResult.StElseReturnType === '' || businessRuleResult.StElseReturnType !== 'document') {
+                                break;
+                            }
+                            if (businessRuleResult.DsElseReturn === '') {
+                                break;
+                            }
+
+                            files = JSON.parse(businessRuleResult.DsElseReturn);
+                            break;
+                        }
+                        else {
+                            if (businessRuleResult.StReturnType === '' || businessRuleResult.StReturnType !== 'document') {
+                                continue;
+                            }
+                        }
+
+                        var jsonFiles = JSON.parse(businessRuleResult.DsReturn);
+                        $.each(jsonFiles, function (index, file) {
+                            files.push(file);
+                        });
+                    }
+
+                    $.each(files, function (index, document) {
+                        if (document.Document === '')
+                            return true;
+
+                        fileList.push({
+                            id: index,
+                            Nome: document.Document
+                        });
+                    });
+
+                    formalizationModule.vars.docList = fileList;
+                    formalizationModule.capture.load();
+                    return fileList;
+                });
+            return ajaxPromise;
+        },
+        getFormData: function () {
+            var elements = [];
+            var inputs = $('#FrmExecute').find('input[xname]');
+            $.each(inputs, function (i, obj) {
+                var dsName = $(obj).attr('xname').replace(/^inp/, '');
+                var dsValue = $(obj).val();
+                elements.push({ fieldName: dsName, value: dsValue });
+            });
+
+            return elements
         loadButtons: function () {
             //$('#ContainerForm .box-header h2').css('float', 'left');
             $('#ContainerForm').prepend(formalizationModule.vars.buttonsPattern);
