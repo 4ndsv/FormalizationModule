@@ -164,8 +164,12 @@ var formalizationModule = {
         fileForViewerPattern:
             '<div><p style="cursor:pointer" fileviewer="__indexFile__" filedirectory="__fileDirectory__">__fileName__</p>\
             <div style="margin-left:10px; display:none" checkviewer="__indexFile__">\
-                    <p class="criteria" index="0" approved="true" comment="" style="cursor:pointer">Legivel <icon class="icon icon-remove"></icon> <icon class="icon icon-comment"></icon></p>\
-                    <p class="criteria" index="1" approved="true" comment="" style="cursor:pointer">Validade <icon class="icon icon-remove"></icon> <icon class="icon icon-comment"></p>\
+                    <p class="criteria" index="0" approved="true" comment="" style="cursor:pointer">Legivel\
+            <span class= "label label-default removeCriteria"> <i class="icon-remove-sign icon-white"></i></span></icon>\
+            <span class="label label-default commentCriteria"><i class="icon-comment icon-white"></i></span></p>\
+                    <p class="criteria" index="1" approved="true" comment="" style="cursor:pointer">Validade\
+            <span class= "label label-default removeCriteria"> <i class="icon-remove-sign icon-white"></i></span></icon>\
+            <span class="label label-default commentCriteria"><i class="icon-comment icon-white"></i></span></p>\
         </div></div>'
     },
     capture: {
@@ -948,9 +952,10 @@ window.onload = function () {
         });
     });
 
-    $('.icon.icon-comment').click(function () {
+    $('.commentCriteria').click(function () {
         $('#CommentModal').modal('toggle');
         $('#CommentModal .modal-body p').first().show();
+        $('#txtComment').val($(this).parent('.criteria').attr('comment'));
         $('#criteriaComment').text($(this).parent('.criteria').text().trim());
         $('#inpIndexCriteria').val($(this).parent('.criteria').attr('index'));
         $('#CommentModal').css('width', '');
@@ -961,20 +966,22 @@ window.onload = function () {
         $('.task').show();
         $('#historicoModal').css('width', 'auto');
     });
-    $("p").delegate(".icon-remove", "click", function () {
-        $(this).parent('.criteria').css('color', 'red');
-        $(this).parent('.criteria').css('font-weight', 'bold');
-        $(this).parent('.criteria').attr('approved', 'false');
-        $(this).attr('class', 'icon icon-ok');
-    });
-    $("p").delegate(".icon-ok", "click", function () {
-        $(this).parent('.criteria').css("color", "");
-        $(this).parent('.criteria').css("font-weight", "");
-        $(this).parent('.criteria').attr('approved', 'true');
-        $(this).attr('class', 'icon icon-remove');
+    $('.removeCriteria').click(function () {
+        if ($(this).parent('p').attr('approved') === 'true') {
+            $(this).parent('p').attr('approved', 'false');
+            $(this).attr('class', 'label label-important removeCriteria');
+        } else {
+            $(this).parent('p').attr('approved', 'true');
+            $(this).attr('class', 'label label-default removeCriteria');
+        }
     });
     $('#btnSaveComment').click(function () {
-        var criteria = $('.criteria [index=' + $('#inpIndexCriteria').val() + ']');
+        var criteria = $('.criteria[index=' + $('#inpIndexCriteria').val() + ']');
+        if ($('#txtComment').val() === '')
+            criteria.find('.commentCriteria').attr('class', 'label label-default commentCriteria');
+        else
+            criteria.find('.commentCriteria').attr('class', 'label label-info commentCriteria');
+
         criteria.attr('comment', $('#txtComment').val());
     });
     $('#div11568').text('André de Sousa Viana');
