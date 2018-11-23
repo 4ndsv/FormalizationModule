@@ -86,12 +86,13 @@ var formalizationModule = {
         <h3 id="myModalLabel">Comentário</h3>\
       </div>\
       <div class="modal-body">\
+            <input type="hidden" id="inpIndexCriteria" />\
         <br><b>Criterio:</b> <p style="display:inline-block" id="criteriaComment"></p>\
-          <br><b>Comentar:</b><br><textarea style="width:100%"></textarea>\
+          <br><b>Comentar:</b><br><textarea id="txtComment" style="width:100%"></textarea>\
             <p>\
       <div class="modal-footer">\
         <button class="btn" data-dismiss="modal" aria-hidden="true">Fechar</button>\
-        <button class="btn btn-primary">Salvar</button>\
+        <button id="btnSaveComment" class="btn btn-primary" data-dismiss="modal" aria-hidden="true">Salvar</button>\
       </div>\
     </div>',
         modal41: '<div class="modal fade" id="formalizationModal" tabindex="-1" role="dialog" aria-labelledby="formalizarionModalLabel" aria-hidden="true">\
@@ -163,8 +164,8 @@ var formalizationModule = {
         fileForViewerPattern:
             '<div><p style="cursor:pointer" fileviewer="__indexFile__" filedirectory="__fileDirectory__">__fileName__</p>\
             <div style="margin-left:10px; display:none" checkviewer="__indexFile__">\
-                    <p style="cursor:pointer">Legivel <icon class="icon icon-remove"></icon> <icon class="icon icon-comment"></icon></p>\
-            <p style="cursor:pointer">Validade <icon class="icon icon-remove"></icon> <icon class="icon icon-comment"></p>\
+                    <p class="criteria" index="0" approved="true" comment="" style="cursor:pointer">Legivel <icon class="icon icon-remove"></icon> <icon class="icon icon-comment"></icon></p>\
+                    <p class="criteria" index="1" approved="true" comment="" style="cursor:pointer">Validade <icon class="icon icon-remove"></icon> <icon class="icon icon-comment"></p>\
         </div></div>'
     },
     capture: {
@@ -397,7 +398,7 @@ var formalizationModule = {
             $('icon.icon.icon-list-alt').removeClass('icon-white');
             $('icon.icon.icon-picture').addClass('icon-white');
             $('icon.icon.icon-indent-right').removeClass('icon-white');
-            img.init('.imageContent .imageDefault');
+            this.docsInit();
         },
         showForm: function () {
             $('#FrmExecute').show();
@@ -419,7 +420,14 @@ var formalizationModule = {
             $('icon.icon.icon-list-alt').removeClass('icon-white');
             $('icon.icon.icon-picture').removeClass('icon-white');
             $('icon.icon.icon-indent-right').addClass('icon-white');
-            img.init('.imageContent .imageDefault');
+            this.docsInit();
+        },
+        docsInit: function () {
+            if ($('div[checkviewer]').length > 0) {
+                img.imageDefaultSrc = $($('p[fileviewer]')[0]).attr('filedirectory');
+                img.init('.imageContent .imageDefault');
+                $($('div[checkviewer]')[0]).show();
+            }
         },
         htmlDocBuild: function () {
             var analisysContentBody = formalizationModule.vars.analisysContentBody;
@@ -927,11 +935,6 @@ var formalizationModule = {
 };
 //$('window').load(function(){
 window.onload = function () {
-    if ($('div[checkviewer]').length > 0) {
-        img.imageDefaultSrc = $($('p[fileviewer]')[0]).attr('filedirectory');
-        img.init('.imageContent .imageDefault');
-        $($('div[checkviewer]')[0]).show();
-    }
 
     $('p[fileviewer]').click(function () {
         var obj = $(this);
@@ -948,15 +951,31 @@ window.onload = function () {
     $('.icon.icon-comment').click(function () {
         $('#CommentModal').modal('toggle');
         $('#CommentModal .modal-body p').first().show();
-        $('#criteriaComment').text($(this).parent('p').text().trim());
+        $('#criteriaComment').text($(this).parent('.criteria').text().trim());
+        $('#inpIndexCriteria').val($(this).parent('.criteria').attr('index'));
         $('#CommentModal').css('width', '');
 
     });
-    $('.icon.icon-time').click(function () {
+    $('.icon.icon-time').parent('span').click(function () {
         $('#historicoModal').modal('toggle');
-        $('#historicoModal .modal-body p').first().hide();
         $('.task').show();
         $('#historicoModal').css('width', 'auto');
+    });
+    $("p").delegate(".icon-remove", "click", function () {
+        $(this).parent('.criteria').css('color', 'red');
+        $(this).parent('.criteria').css('font-weight', 'bold');
+        $(this).parent('.criteria').attr('approved', 'false');
+        $(this).attr('class', 'icon icon-ok');
+    });
+    $("p").delegate(".icon-ok", "click", function () {
+        $(this).parent('.criteria').css("color", "");
+        $(this).parent('.criteria').css("font-weight", "");
+        $(this).parent('.criteria').attr('approved', 'true');
+        $(this).attr('class', 'icon icon-remove');
+    });
+    $('#btnSaveComment').click(function () {
+        var criteria = $('.criteria [index=' + $('#inpIndexCriteria').val() + ']');
+        criteria.attr('comment', $('#txtComment').val());
     });
     $('#div11568').text('André de Sousa Viana');
     $('#div11567').text('Brasileiro');
