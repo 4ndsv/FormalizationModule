@@ -164,13 +164,10 @@ var formalizationModule = {
         fileForViewerPattern:
             '<div><p style="cursor:pointer" fileviewer="__indexFile__" codfile="__codfile__" filedirectory="__fileDirectory__">__fileName__</p>\
             <div style="margin-left:10px; display:none" checkviewer="__indexFile__">\
-                    <p class="criteria" index="0" approved="true" comment="" style="cursor:pointer">Legivel\
+        </div></div>',
+        criteriaContentPattern: '<p class="criteria" index="__index__" approved="true" comment="" style="cursor:pointer">__criteriaName__\
             <span class= "label label-default removeCriteria"> <i class="icon-remove-sign icon-white"></i></span></icon>\
-            <span class="label label-default commentCriteria"><i class="icon-comment icon-white"></i></span></p>\
-                    <p class="criteria" index="1" approved="true" comment="" style="cursor:pointer">Validade\
-            <span class= "label label-default removeCriteria"> <i class="icon-remove-sign icon-white"></i></span></icon>\
-            <span class="label label-default commentCriteria"><i class="icon-comment icon-white"></i></span></p>\
-        </div></div>'
+            <span class="label label-default commentCriteria"><i class="icon-comment icon-white"></i></span></p>'
     },
     capture: {
         buildDocsHtml: function () {
@@ -382,7 +379,123 @@ var formalizationModule = {
             this.htmlDocBuild();
             this.buildHistory();
             $('.content').append(formalizationModule.vars.modalComment);
+            this.loadChecklist();
 
+        },
+        loadChecklist: function () {
+            var _this = this;
+            var fileList = []
+            let codBre = _this.getCodBrePromise()
+                .then(function (codBre) {
+                    return _this.validateBusinessRulesRequest(4, _this.getFormData());
+                }).then(function (list) {
+                    console.log(list);
+                });
+
+
+
+        },
+        getCodBrePromise: function () {
+            let codFlow = document.getElementById('inpCodFlow').value;
+            /*var promiseCodBre = $.ajax({
+                url: "urldoMarco" + "method",
+                type: "GET",
+                data: codFlow
+            });*/
+            var def = jQuery.Deferred();
+            def.resolve(4);
+            return def;
+        },
+        validateBusinessRulesRequest: function (businessRuleCode, formData) {
+
+            var _this = this;
+
+            var ajaxPromise = $.ajax({
+                url: '../api/1.0/businessrules/' + businessRuleCode + '/evaluate',
+                method: 'POST',
+                headers: {
+                    'Authorization': $('#inpToken').val(),
+                    'Content-Type': 'application/json'
+                },
+                // dataType: 'json', // a propriedade headers sobrescreve isso
+                data: JSON.stringify(formData)
+            })
+                .then(function (result, textStatus, xhr) {
+
+                    /*
+                    se se enquadrar em uma ou mais condições
+                    { CodBreRule: 1, StReturnType: 'string', DsReturn: '/nome do documento > condicao1 > condicao2; outro nome do documento > condicao3'}, CodBreRule: 2, StReturnType: 'string', DsReturn: '/mais um nome do documento > condicao4'}]
+                    se se enquadrar no se não
+                    [{StElseReturnType: 'string', DsElseReturn: '??' }
+                    se não se enquadrar em nenhuma condição
+                    [{StElseReturnType: '', DsElseReturn: '' }
+                    */
+
+                    var businessRuleResult;
+                    var files = [];
+                    var fileList = [];
+
+                    for (var i = 0; i < result.length; i++) {
+
+                        businessRuleResult = result[i];
+
+                        if (businessRuleResult.hasOwnProperty('StElseReturnType')) {
+
+                            // se vier com formato inválido, não tomar ação
+
+                            // pré-verificação pra evitar regex
+                            if (businessRuleResult.StElseReturnType === '' || businessRuleResult.StElseReturnType !== 'document') {
+                                break;
+                            }
+                            if (businessRuleResult.DsElseReturn === '') {
+                                break;
+                            }
+
+                            files = JSON.parse(businessRuleResult.DsElseReturn);
+                            break;
+                        }
+                        else {
+                            if (businessRuleResult.StReturnType === '' || businessRuleResult.StReturnType !== 'document') {
+                                continue;
+                            }
+                        }
+
+                        var jsonFiles = JSON.parse(businessRuleResult.DsReturn);
+                        $.each(jsonFiles, function (index, file) {
+                            files.push(file);
+                        });
+                    }
+
+
+                    $.each(files, function (index, document) {
+                        if (document.Document === '')
+                            return true;
+
+                        $.each(document.Checklist, function (iCheck, check) {
+                            if (check.Name === '')
+                                return true;
+
+                            var fileViewer = $('[fileviewer]').filter(function () { return $(this).text() === document.Document; })
+                            if (fileViewer != undefined) {
+                                var checkViewer = fileViewer.parent('div').find('[checkviewer]')
+                                var pattern = formalizationModule.vars.criteriaContentPattern.replace('__index__', iCheck).replace('__criteriaName__', check.Name);
+                                checkViewer.append(pattern);
+                            }
+                        });
+                    });
+                });
+            return ajaxPromise;
+        },
+        getFormData: function () {
+            var elements = [];
+            var inputs = $('#FrmExecute').find('input[xname]');
+            $.each(inputs, function (i, obj) {
+                var dsName = $(obj).attr('xname').replace(/^inp/, '');
+                var dsValue = $(obj).val();
+                elements.push({ DsFieldName: dsName, DsValue: dsValue });
+            });
+
+            return elements;
         },
         loadButtons: function () {
             //$('#ContainerForm .box-header h2').css('float', 'left');
