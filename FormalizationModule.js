@@ -466,7 +466,7 @@ var formalizationModule = {
                         });
                     }
 
-
+                    var iCriteria = 0;
                     $.each(files, function (index, document) {
                         if (document.Document === '')
                             return true;
@@ -475,10 +475,10 @@ var formalizationModule = {
                             if (check.Name === '')
                                 return true;
 
-                            var fileViewer = $('[fileviewer]').filter(function () { return $(this).text() === document.Document; })
+                            var fileViewer = $('[fileviewer]').filter(function () { return $(this).text() === document.Document; });
                             if (fileViewer != undefined) {
-                                var checkViewer = fileViewer.parent('div').find('[checkviewer]')
-                                var pattern = formalizationModule.vars.criteriaContentPattern.replace('__index__', iCheck).replace('__criteriaName__', check.Name);
+                                var checkViewer = fileViewer.parent('div').find('[checkviewer]');
+                                var pattern = formalizationModule.vars.criteriaContentPattern.replace('__index__', iCriteria++).replace('__criteriaName__', check.Name);
                                 checkViewer.append(pattern);
                             }
                         });
@@ -506,7 +506,7 @@ var formalizationModule = {
                 $('#btnsFormalization .btn').attr('class', 'btn btn-default');
                 $(this).removeClass('btn-default').addClass('btn-primary');
             });
-            $('#btnFinish').click(this.saveHistory);
+            $('#buttons button').click(this.saveHistory);
         },
         showDocs: function () {
             $('#FrmExecute').hide();
@@ -576,13 +576,43 @@ var formalizationModule = {
             return files;
         },
         saveHistory: function () {
-            var codFlowExecute = document.getElementById('inpCodFlowExecuteTask');
-            var codFile = document.getElementById('inpCodFlowExecuteTask');
-            var dsCriteria = document.getElementById('inpCodFlowExecuteTask');
-            var stApproved = document.getElementById('inpCodFlowExecuteTask');
-            //var codFlowExecute = document.getElementById('inpCodFlowExecuteTask');
+            var codFlowExecute = document.getElementById('inpCodFlowExecute').value;
+            var codFlowExecuteTask = document.getElementById('inpCodFlowExecuteTask').value;
+            var data = [];
 
-            //var data = { CodFlowExecute:  }
+            $.each($('[fileviewer]'), function (i, file) {
+                var codFile = $(file).attr('codFile');
+
+                $.each($(file).parent('div').find('[checkviewer] p'), function (i, check) {
+
+                    var dsCriteria = $(check).text().trim();
+                    var stApproved = $(check).attr('approved');
+                    var dsComment = $(check).attr('comment');
+
+                    data.push({
+                        CodFlowExecute: codFlowExecute,
+                        CodFlowExecuteTask: codFlowExecuteTask,
+                        CodFile: codFile,
+                        DsCriteria: dsCriteria,
+                        StApproved: stApproved,
+                        DsComment: dsComment
+                    });
+                });
+            });
+
+            $.ajax({
+                url: '../Applications/api-formalization-unicred/api/history',
+                method: 'POST',
+                data: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(function (result, textStatus, xhr) {
+                    return result;
+                }, function (error) {
+                    alert('Erro ao salvar o histórico : ' + '\n' + error.statusText + '\n' + error.responseText);
+                });
         },
         requestHistory: function () {
 
@@ -609,7 +639,7 @@ var formalizationModule = {
                         taskContent = taskContent.replace('__statusTask__', task.Status);
                         taskContent = taskContent.replace('__autorTask__', task.Autor);
                         taskContent = taskContent.replace('__dataInicioTask__', task.DataInicio);
-                        taskContent = taskContent.replace('__dataFimTask__', task.DataFim);
+                        taskContent = taskContent.replace('__dataFimTask__', task.DataFim === null ? '' : task.DataFim);
 
                         var documentContent = '';
                         $.each(task.Documentos, function (iDocument, document) {
@@ -622,8 +652,8 @@ var formalizationModule = {
                             $.each(document.Criterios, function (iCheck, check) {
                                 checklistContent += formalizationModule.vars.historyChecklistPattern;
                                 checklistContent = checklistContent.replace('__criteria__', check.Nome);
-                                checklistContent = checklistContent.replace('__iconCheck__', check.Approved ? 'ok' : 'remove');
-                                checklistContent = checklistContent.replace('__sucessImportant__', check.Approved ? 'success' : 'important');
+                                checklistContent = checklistContent.replace('__iconCheck__', parseInt(check.Approved) ? 'ok' : 'remove');
+                                checklistContent = checklistContent.replace('__sucessImportant__', parseInt(check.Approved) ? 'success' : 'important');
 
                                 if (check.Comentario !== '') {
                                     var commentContent = formalizationModule.vars.historyCommentPattern;
@@ -632,7 +662,7 @@ var formalizationModule = {
                                     checklistContent += commentContent;
                                 }
 
-                                if (!check.Approved)
+                                if (!parseInt(check.Approved))
                                     approved = false;
                             });
 
@@ -1081,7 +1111,7 @@ window.onload = function () {
         });
     });
 
-    $('.commentCriteria').click(function () {
+    $('.tab-content').delegate('.commentCriteria', 'click', function () {
         $('#CommentModal').modal('toggle');
         $('#CommentModal .modal-body p').first().show();
         $('#txtComment').val($(this).parent('.criteria').attr('comment'));
@@ -1095,7 +1125,7 @@ window.onload = function () {
         $('.task').show();
         $('#historicoModal').css('width', 'auto');
     });
-    $('.removeCriteria').click(function () {
+    $('.tab-content').delegate('.removeCriteria', 'click', function () {
         if ($(this).parent('p').attr('approved') === 'true') {
             $(this).parent('p').attr('approved', 'false');
             $(this).attr('class', 'label label-important removeCriteria');
