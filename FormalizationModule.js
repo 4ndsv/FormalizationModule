@@ -384,27 +384,22 @@ var formalizationModule = {
         },
         loadChecklist: function () {
             var _this = this;
-            var fileList = []
-            let codBre = _this.getCodBrePromise()
+            _this.getCodBrePromise()
                 .then(function (codBre) {
-                    return _this.validateBusinessRulesRequest(4, _this.getFormData());
+                    if (codBre === -1)
+                        return;
+
+                    return _this.validateBusinessRulesRequest(codBre, _this.getFormData());
                 }).then(function (list) {
                     console.log(list);
                 });
-
-
-
         },
         getCodBrePromise: function () {
-            let codFlow = document.getElementById('inpCodFlow').value;
-            /*var promiseCodBre = $.ajax({
-                url: "urldoMarco" + "method",
-                type: "GET",
-                data: codFlow
-            });*/
-            var def = jQuery.Deferred();
-            def.resolve(4);
-            return def;
+            let codFlowExecute = document.getElementById('inpCodFlowExecute').value;
+            return $.ajax({
+                url: "../Applications/api-formalization-unicred/api/BusinessRules/GetBusinessRuleGroupCod/" + codFlowExecute,
+                type: "GET"
+            });
         },
         validateBusinessRulesRequest: function (businessRuleCode, formData) {
 
