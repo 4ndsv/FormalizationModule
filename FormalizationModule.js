@@ -133,7 +133,7 @@ var formalizationModule = {
                     <div class="row" id="divImgClone" style="overflow:auto;position:absolute; width:180px; height:80px;overflow:hidden;border-radius:4px;z-index:1;display:none;">\
                         <canvas class="image imageClone"></canvas>\
                     </div>\
-                    <div class="row" style=" text-align:center; margin-left:0px !important;  background-color: lightgray;;overflow:auto; border: solid thin #dddddd; margin-top:7px">\
+                    <div class="row" style=" text-align:center; margin-left:0px !important;  background-color: lightgray;;overflow:auto; border: solid thin #dddddd; margin-top:7px; line-height: 0px; padding-bottom:3px;">\
                         <canvas class=\'image imageDefault\' style="margin-left:auto;margin-right:auto;background-color: gray;"></canvas>\
 						<embed class="plugin" src="" style="display:none;" >\
                     </div>\
@@ -539,7 +539,7 @@ var formalizationModule = {
             if (img.imageDefaultSrc.trim() == "" && $('div[checkviewer]').length > 0) {
                 img.imageDefaultSrc = $($('p[fileviewer]')[0]).attr('filedirectory');
                 img.init('.imageContent .imageDefault');
-                $($('div[checkviewer]')[0]).show();
+                $('p[fileviewer]')[0].click();
             }
         },
         htmlDocBuild: function () {
