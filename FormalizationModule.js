@@ -46,9 +46,9 @@ var formalizationModule = {
       </div>',
         historyTaskPattern: '\
         <div class="task">\
-            <i class="icon-chevron-down" onclick="formalizationModule.analisys.history.showDocs(this)"></i>\
+            <i class="icon-chevron-down" onclick="formalizationModule.analisys.history.showDocs(this)" style="display:__displaydocsdown__"></i>\
             <i class="icon-chevron-up" onclick="formalizationModule.analisys.history.hideDocs(this)" style="display:none"></i>\
-            <b>Etapa: </b> __etapa__ <b>Status: </b> __statusTask__ <b>Autor:</b> __autorTask__ <b>Data:</b> __dataInicioTask__ - __dataFimTask__\
+            <b style="margin-left:__marginleftetapa__">Etapa: </b> __etapa__ <b>Status: </b> __statusTask__ <b>Autor:</b> __autorTask__ <b>Data:</b> __dataInicioTask__ - __dataFimTask__\
             <div class="document" style="margin-left:17px;display:none">\
                 <b>Documentos</b>\
                 __documentContent__\
@@ -59,7 +59,7 @@ var formalizationModule = {
         historyDocumentPattern:
             '<span>\
                     <br>\
-                    <i class="icon-chevron-down" onclick="formalizationModule.analisys.history.showChecklist(this)"></i>\
+                    <i class="icon-chevron-down" onclick="formalizationModule.analisys.history.showChecklist(this)" style="display:__displaychecksdown__"></i>\
                     <i class="icon-chevron-up" onclick="formalizationModule.analisys.history.hideChecklist(this)" style="display:none"></i>\
                     <a  href="__diretorioFile__" target="_blank" ><b>__document__: </b></a>__status__\
                     <div class="checklist" style="margin-left:17px; display:none">\
@@ -498,6 +498,9 @@ var formalizationModule = {
         },
         buttonClick: function (el) {
             $('#btnsFormalization .btn').click(function () {
+                if ($(this).find('icon').attr('class') === 'icon icon-time')
+                    return;
+
                 $('#btnsFormalization .btn').attr('class', 'btn btn-default');
                 $(this).removeClass('btn-default').addClass('btn-primary');
             });
@@ -633,6 +636,8 @@ var formalizationModule = {
                         taskContent = taskContent.replace('__etapa__', task.Etapa);
                         taskContent = taskContent.replace('__statusTask__', task.Status);
                         taskContent = taskContent.replace('__autorTask__', task.Autor);
+                        taskContent = taskContent.replace('__displaydocsdown__', !task.Documentos.length ? 'none' : 'inline-block');
+                        taskContent = taskContent.replace('__marginleftetapa__', !task.Documentos.length ? '18px' : '0px');
                         taskContent = taskContent.replace('__dataInicioTask__', task.DataInicio);
                         taskContent = taskContent.replace('__dataFimTask__', task.DataFim === null ? '' : task.DataFim);
 
@@ -660,11 +665,12 @@ var formalizationModule = {
                                 if (!parseInt(check.Approved))
                                     approved = false;
                             });
-
+                            
                             documentContent = documentContent.replace('__status__', !document.Criterios.length ? 'Capturado' : approved ? 'Aprovado' : 'Reprovado');
+                            documentContent = documentContent.replace('__displaychecksdown__', !document.Criterios.length ? 'none' : 'inline-block');
                             documentContent = documentContent.replace('__checklistContent__', checklistContent);
                         });
-
+                        
                         taskContent = taskContent.replace('__documentContent__', documentContent);
                     });
 
@@ -679,28 +685,24 @@ var formalizationModule = {
         },
         history: {
             showDocs: function (t) {
-                debugger;
                 $(t).parent().find('.icon-chevron-down').first().hide();
                 $(t).parent().find('.icon-chevron-up').first().show();
                 $(t).parent().find('.document').show();
                 //$('.task[taskId='+taskId+'] .document').show();
             },
             showChecklist: function (t) {
-                debugger;
                 $(t).parent().find('.icon-chevron-down').hide();
                 $(t).parent().find('.icon-chevron-up').show();
                 $(t).parent().find('.checklist').show();
                 //$('.task[taskId='+taskId+'] .document .checklist').show();
             },
             hideDocs: function (t) {
-                debugger;
                 $(t).parent().find('.icon-chevron-down').first().show();
                 $(t).parent().find('.icon-chevron-up').first().hide();
                 $(t).parent().find('.document').hide();
                 //$('.task[taskId='+taskId+'] .document').show();
             },
             hideChecklist: function (t) {
-                debugger;
                 $(t).parent().find('.icon-chevron-down').show();
                 $(t).parent().find('.icon-chevron-up').hide();
                 $(t).parent().find('.checklist').hide();
@@ -1115,7 +1117,7 @@ window.onload = function () {
         $('#CommentModal').css('width', '');
 
     });
-    $('.icon.icon-time').parent('span').click(function () {
+    $('.icon-time').parent('span').click(function (e) {
         $('#historicoModal').modal('toggle');
         $('.task').show();
         $('#historicoModal').css('width', 'auto');
